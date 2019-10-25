@@ -172,7 +172,38 @@ def define_tables(connection, cursor):
 
 
 def insert_data(connection, cursor):
-    # Insert VALUES into Data
+    insert_persons = ''' insert into persons values
+                            ('Trayvon', 'Fox', '1892-07-17', 'PeaceRiver,AB', '133 Street PR', '443-449-9999'),\
+                            ('Lillian', 'Bounds', '1899-02-15', 'Spalding, Idaho', 'Los Angeles, US', '213-555-5556'),\
+                            ('Adam', 'Rafiei', "1900-01-02", "Shiraz,Iran", "Tehran,Iran", "916-331-3311"),\
+                            ('James', 'Smith', '1900-08-08', 'Calgary,AB', '43,43Ave', '720-000-0001'),\
+                            ('Walt', 'Disney', '1901-12-05', 'Chicago, US', 'Los Angeles, US', '213-555-5555'),\
+                            ('Mary', 'Brown', '1905-11-15', 'Nordegg,AB', '22,67Ave', '776-655-9955'),\
+                            ('John', 'Truyens', '1907-05-15', 'Flanders, Belgium', 'Beverly Hills, Los Angeles, US', '213-555-5558'),\
+                            ('Linda', 'Smith', '1908-02-26', 'Ohaton,AB', '43,43Ave', '680-099-9943'),\
+                            ('Minnie', 'Mouse', '1928-01-05', 'Disneyland', 'Anaheim, US', '714-555-5552'),\
+                            ('Mickey', 'Mouse', '1928-01-05', 'Disneyland', 'Anaheim, US', '714-555-5551'),\
+                            ("Mary", "Smith", "1950-11-08", "Calgary,AB", "11Ave,1st", "604-555-2244"),\
+                            ("Aunt", "Smith", "1951-12-08", "Calgary,AB", "11Ave,1st", "888-555-2244"),\
+                            ("Dave", "Fox", "1950-03-29", "Calgary,AB", "11Ave,1st", "664-110-8763"),\
+                            ("Uncle", "Fox", "1951-03-29", "Calgary,AB", "11Ave,1st", "780-110-8743"),\
+                            ('Michael', 'Fox', '1981-06-09', 'Edmonton, AB', 'Manhattan, New York, US', '212-111-1111'),\
+                            ('Cousin1', 'Fox', '1981-06-09', 'Edmonton, AB', 'Manhattan, New York, US', '666-111-1111'),\
+                            ('Cousin2', 'Fox', '1991-02-06', 'Edmonton, AB', 'Manhattan, New York, US', '666-111-1111'),\
+                            ("Megan", "Fox", "1982-06-09", "Calgary,AB", "12Ave,101st", "780-460-1134"),\
+                            ("Fatima", "Fox", "1992-06-09", "Calgary,AB", "12Ave,101st", "444-470-7734"),
+                            ("Lisa", "Bounds", "1999-04-10", "Spalding,Idaho", "Moscow,101st", "604-420-1234"),
+                            ('Diane', 'Wong', '1973-04-04', 'England', 'London,Hackney', '766-664-6678'),\
+                            ('Davood', 'Rafiei', date('now', '-21 years'), 'Iran', '100 Lovely Street,Edmonton,AB', '780-111-2222'),\
+                            ('Linda', 'Fox', '1991-02-04', 'England', 'London', '344-447-7755'),\
+                            ('Tammy', 'Fox', '1991-02-04', 'England', 'Manchester', '344-111-2345'),
+                            ('Henry', 'Wong', '1993-04-04', 'Canada', 'Alert', '566-664-6678'),
+                            ('Michael', 'Parenti', '1991-02-04', 'England', 'London', '344-447-7755'); '''
+    insert_users = '''insert into users values
+                        ('jstainer0','2ZU0pfEWz6v','a','Michael','Fox','Edmonton'),
+                        ('zgegg1','P62JfnX','o','Lillian', 'Bounds','Calgary'),
+                        ('msemper2','gorLa6','a','Adam','Rafiei','Red Deer'),
+                        ('cesselin3','GHRiSvn','o','Linda','Smith','Jasper');'''
 
     cursor.execute(insert_persons)
     cursor.execute(insert_births)
