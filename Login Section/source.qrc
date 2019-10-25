@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="newPrefix">
+    <file>n-n-BtbjCFUvBXs-unsplash.jpg</file>
+    <file>andre-iv-HssZQM_TjAo-unsplash.jpg</file>
+    <file>janke-laskowski-gneiEi5yN1s-unsplash.jpg</file>
+    <file>noun_Bear_2887266.png</file>
+  </qresource>
+</RCC>
