@@ -1,25 +1,32 @@
+"""
+CMPUT 291 - Group Mini Project 1
+
+This .py file contains the functions that clears and initialize the database required.
+The structure, variable names and tables are provided to us.
+"""
+
 import sqlite3
 import time
-import hashlib
 
-connection = None
-cursor = None
-
-
-
+'''
+Connect(path) is required since main function will be in a separate file.
+Establish a connection to the database pass on as a parameter.
+Return the connection and a cursor 
+'''
 def connect(path):
-    global connection, cursor
-
-    #
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
-    cursor.execute(' PRAGMA forteign_keys=ON; ')
+    cursor.execute(' PRAGMA foreign_keys=ON; ')
+    
     connection.commit()
-    return
+    return connection, cursor
 
+
+'''
+Drop all the tables in the given database
+'''
 def drop_tables(connection, cursor):
-    # Drop tables for given queries
-    drop_query=   '''
+    drop_query = '''
                         drop table if exists demeritNotices;
                         drop table if exists tickets;
                         drop table if exists registrations;
@@ -29,36 +36,37 @@ def drop_tables(connection, cursor):
                         drop table if exists persons;
                         drop table if exists payments;
                         drop table if exists users;
-                    '''
+                 '''
     cursor.executescript(drop_query)
+    
     connection.commit()
     return
-def define_tables(connection, cursor):   
-    # Define and create tables for our DB
-    persons_query=   '''
+
+def define_tables(connection, cursor):
+    persons_query = '''
                         CREATE TABLE persons (
-                                    fname	char(12),
-                                    lname	char(12),
-                                    bdate	date,
-                                    bplace	char(20), 
-                                    address	char(30),
-                                    phone	char(12),
+                                    fname	CHAR(12),
+                                    lname	CHAR(12),
+                                    bDATE	DATE,
+                                    bplace	CHAR(20), 
+                                    address	CHAR(30),
+                                    phone	CHAR(12),
                                     PRIMARY KEY (fname, lname)
                                     );
                     '''
 
-    births_query=  '''
+    births_query = '''
                         CREATE TABLE births (
-                                    regno	int,
-                                    fname	char(12),
-                                    lname	char(12),
-                                    regdate	date,
-                                    regplace	char(20),
-                                    gender	char(1),
-                                    f_fname	char(12),
-                                    f_lname	char(12),
-                                    m_fname	char(12),
-                                    m_lname	char(12),
+                                    regno	INT,
+                                    fname	CHAR(12),
+                                    lname	CHAR(12),
+                                    regDATE	DATE,
+                                    regplace	CHAR(20),
+                                    gender	CHAR(1),
+                                    f_fname	CHAR(12),
+                                    f_lname	CHAR(12),
+                                    m_fname	CHAR(12),
+                                    m_lname	CHAR(12),
                                     PRIMARY KEY (regno),
                                     FOREIGN KEY (fname,lname) references persons,
                                     FOREIGN KEY (f_fname,f_lname) references persons,
@@ -66,100 +74,106 @@ def define_tables(connection, cursor):
                                     );
                     '''
 
-    marriages_query= '''
+    marriages_query = '''
                     CREATE TABLE marriages (
-                                    regno	int,
-                                    regdate	date,
-                                    regplace	char(20),
-                                    p1_fname	char(12),
-                                    p1_lname	char(12),
-                                    p2_fname	char(12),
-                                    p2_lname	char(12),
+                                    regno	INT,
+                                    regDATE	DATE,
+                                    regplace	CHAR(20),
+                                    p1_fname	CHAR(12),
+                                    p1_lname	CHAR(12),
+                                    p2_fname	CHAR(12),
+                                    p2_lname	CHAR(12),
                                     PRIMARY KEY (regno),
                                     FOREIGN KEY (p1_fname,p1_lname) references persons,
                                     FOREIGN KEY (p2_fname,p2_lname) references persons
                                     );
-                    '''
-    vehicles_query= '''
+                      '''
+    vehicles_query = '''
                     CREATE TABLE vehicles (
-                                    vin		char(5),
-                                    make	char(10),
-                                    model	char(10),
-                                    year	int,
-                                    color	char(10),
+                                    vin		CHAR(5),
+                                    make	CHAR(10),
+                                    model	CHAR(10),
+                                    year	INT,
+                                    color	CHAR(10),
                                     PRIMARY KEY (vin)
                                     );
-                    '''   
-    registrations_query= '''
+                      '''
+    registrations_query = '''
                     CREATE TABLE registrations (
-                                    regno	int,
-                                    regdate	date,
-                                    expiry	date,
-                                    plate	char(7),
-                                    vin		char(5), 
-                                    fname	char(12),
-                                    lname	char(12),
+                                    regno	INT,
+                                    regDATE	DATE,
+                                    expiry	DATE,
+                                    plate	CHAR(7),
+                                    vin		CHAR(5), 
+                                    fname	CHAR(12),
+                                    lname	CHAR(12),
                                     primary key (regno),
                                     foreign key (vin) references vehicles,
                                     foreign key (fname,lname) references persons
                                     );
-                        '''  
-    tickets_query= '''
+                          '''
+    tickets_query = '''
                     CREATE TABLE tickets (
-                                    tno		int,
-                                    regno	int,
-                                    fine	int,
+                                    tno		INT,
+                                    regno	INT,
+                                    fine	INT,
                                     violation	text,
-                                    vdate	date,
+                                    vDATE	DATE,
                                     primary key (tno),
                                     foreign key (regno) references registrations
                                     );
                     '''
-    demeritNotices_query= '''
+    demeritNotices_query = '''
                     CREATE TABLE demeritNotices (
-                                    ddate	date, 
-                                    fname	char(12), 
-                                    lname	char(12), 
-                                    points	int, 
+                                    dDATE	DATE, 
+                                    fname	CHAR(12), 
+                                    lname	CHAR(12), 
+                                    poINTs	INT, 
                                     desc	text,
-                                    primary key (ddate,fname,lname),
+                                    primary key (dDATE,fname,lname),
                                     foreign key (fname,lname) references persons
                                     );
-                    '''
-    payments_query= '''
+                          '''
+    payments_query = '''
                     CREATE TABLE payments (
-                                    tno		int,
-                                    pdate	date,
-                                    amount	int,
-                                    primary key (tno, pdate),
+                                    tno		INT,
+                                    pDATE	DATE,
+                                    amount	INT,
+                                    primary key (tno, pDATE),
                                     foreign key (tno) references tickets
                                     );
                     '''
-    users_query= '''
+    users_query = '''
                     CREATE TABLE users (
-                                    uid		char(8),
-                                    pwd		char(8),
-                                    utype	char(1),	-- 'a' for agents, 'o' for officers
-                                    fname	char(12),
-                                    lname	char(12), 
-                                    city	char(15),
+                                    uid		CHAR(8),
+                                    pwd		CHAR(8),
+                                    utype	CHAR(1),	-- 'a' for agents, 'o' for officers
+                                    fname	CHAR(12),
+                                    lname	CHAR(12), 
+                                    city	CHAR(15),
                                     primary key(uid),
                                     foreign key (fname,lname) references persons
                                     );
-                    '''
-        
-    cursor.execute(course_query)
-    cursor.execute(student_query)
-    cursor.execute(enroll_query)
-    connection.commit()
+                  '''
 
+    cursor.execute(persons_query)
+    cursor.execute(births_query)
+    cursor.execute(registrations_query)
+    cursor.execute(marriages_query)
+    cursor.execute(vehicles_query)
+    cursor.execute(registrations_query)
+    cursor.execute(tickets_query)
+    cursor.execute(demeritNotices_query)
+    cursor.execute(payments_query)
+    cursor.execute(users_query)
+
+    connection.commit()
     return
 
+
 def insert_data(connection, cursor):
-    #Test data for database
-    #
-    #
-    #
+    # Insert VALUES into Data
+
     cursor.execute(insert_persons)
     cursor.execute(insert_births)
     cursor.execute(insert_marriages)
@@ -169,9 +183,9 @@ def insert_data(connection, cursor):
     cursor.execute(insert_demeritNotices)
     cursor.execute(insert_payments)
     cursor.execute(insert_users)
-    connection.commit()    
-    return
 
+    connection.commit()
+    return
 
 if __name__ == "__main__":
     main()
