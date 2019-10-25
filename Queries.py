@@ -13,11 +13,13 @@ Connect(path) is required since main function will be in a separate file.
 Establish a connection to the database pass on as a parameter.
 Return the connection and a cursor 
 '''
+
+
 def connect(path):
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
     cursor.execute(' PRAGMA foreign_keys=ON; ')
-    
+
     connection.commit()
     return connection, cursor
 
@@ -25,6 +27,8 @@ def connect(path):
 '''
 Drop all the tables in the given database
 '''
+
+
 def drop_tables(connection, cursor):
     drop_query = '''
                         drop table if exists demeritNotices;
@@ -38,9 +42,10 @@ def drop_tables(connection, cursor):
                         drop table if exists users;
                  '''
     cursor.executescript(drop_query)
-    
+
     connection.commit()
     return
+
 
 def define_tables(connection, cursor):
     persons_query = '''
@@ -206,17 +211,18 @@ def insert_data(connection, cursor):
                         ('cesselin3','GHRiSvn','o','Linda','Smith','Jasper');'''
 
     cursor.execute(insert_persons)
-    cursor.execute(insert_births)
-    cursor.execute(insert_marriages)
-    cursor.execute(insert_vehicles)
-    cursor.execute(insert_registrations)
-    cursor.execute(insert_tickets)
-    cursor.execute(insert_demeritNotices)
-    cursor.execute(insert_payments)
+    #cursor.execute(insert_births)
+    #cursor.execute(insert_marriages)
+    #cursor.execute(insert_vehicles)
+    #cursor.execute(insert_registrations)
+    #cursor.execute(insert_tickets)
+    #cursor.execute(insert_demeritNotices)
+    #cursor.execute(insert_payments)
     cursor.execute(insert_users)
 
     connection.commit()
     return
+
 
 if __name__ == "__main__":
     main()
