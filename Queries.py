@@ -1,5 +1,5 @@
 """
-CMPUT 291 - Group Mini Project 1
+CMPUT 291 F19 - Group Mini Project 1
 
 This .py file contains the functions that clears and initialize the database required.
 The structure, variable names and tables are provided to us.
@@ -52,7 +52,7 @@ def define_tables(connection, cursor):
                         CREATE TABLE persons (
                                     fname	CHAR(12),
                                     lname	CHAR(12),
-                                    bDATE	DATE,
+                                    bdate	DATE,
                                     bplace	CHAR(20), 
                                     address	CHAR(30),
                                     phone	CHAR(12),
@@ -60,12 +60,12 @@ def define_tables(connection, cursor):
                                     );
                     '''
 
-    births_query = '''
+    births_query = '''  
                         CREATE TABLE births (
                                     regno	INT,
                                     fname	CHAR(12),
                                     lname	CHAR(12),
-                                    regDATE	DATE,
+                                    regdate	DATE,
                                     regplace	CHAR(20),
                                     gender	CHAR(1),
                                     f_fname	CHAR(12),
@@ -77,12 +77,12 @@ def define_tables(connection, cursor):
                                     FOREIGN KEY (f_fname,f_lname) references persons,
                                     FOREIGN KEY (m_fname,m_lname) references persons
                                     );
-                    '''
+                   '''
 
     marriages_query = '''
                     CREATE TABLE marriages (
                                     regno	INT,
-                                    regDATE	DATE,
+                                    regdate	DATE,
                                     regplace	CHAR(20),
                                     p1_fname	CHAR(12),
                                     p1_lname	CHAR(12),
@@ -106,7 +106,7 @@ def define_tables(connection, cursor):
     registrations_query = '''
                     CREATE TABLE registrations (
                                     regno	INT,
-                                    regDATE	DATE,
+                                    regdate	DATE,
                                     expiry	DATE,
                                     plate	CHAR(7),
                                     vin		CHAR(5), 
@@ -123,28 +123,28 @@ def define_tables(connection, cursor):
                                     regno	INT,
                                     fine	INT,
                                     violation	text,
-                                    vDATE	DATE,
+                                    vdate	DATE,
                                     primary key (tno),
                                     foreign key (regno) references registrations
                                     );
                     '''
     demeritNotices_query = '''
                     CREATE TABLE demeritNotices (
-                                    dDATE	DATE, 
+                                    ddate	DATE, 
                                     fname	CHAR(12), 
                                     lname	CHAR(12), 
-                                    poINTs	INT, 
+                                    points	INT, 
                                     desc	text,
-                                    primary key (dDATE,fname,lname),
+                                    primary key (ddate,fname,lname),
                                     foreign key (fname,lname) references persons
                                     );
                           '''
     payments_query = '''
                     CREATE TABLE payments (
                                     tno		INT,
-                                    pDATE	DATE,
+                                    pdate	DATE,
                                     amount	INT,
-                                    primary key (tno, pDATE),
+                                    primary key (tno, pdate),
                                     foreign key (tno) references tickets
                                     );
                     '''
@@ -222,7 +222,6 @@ def insert_data(connection, cursor):
 
     connection.commit()
     return
-
 
 if __name__ == "__main__":
     main()
