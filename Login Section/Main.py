@@ -12,15 +12,30 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import source_rc
 
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------     
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 '''
 Class for Login Window. 
 Login Window asks for Username and Password.
 There a "Cancel" button, a "New User" button which pops up a new window and "Login" button.
 '''
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------  
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 class Ui_Dialog_Login(object):
+    '''
+    "Cancel" button has been clicked and cancelButton() function is called to close the window.
+    '''
+
+    def cancelButton(self):
+        sys.exit()
+
+    def NewUserButton(self):
+        Dialog_Register = QtWidgets.QDialog()
+        ui = Ui_Dialog_Register()
+        ui.setupUi(Dialog_Register)
+        Dialog_Register.exec_()
+        Dialog_Register.show()
+
     def setupUi(self, Dialog_Login):
         Dialog_Login.setObjectName("Dialog_Login")
         Dialog_Login.resize(640, 480)
@@ -85,9 +100,9 @@ class Ui_Dialog_Login(object):
         Call a cliked() function when button is clicked
 
         '''
-        self.pushButton_cancel.clicked.connect(Dialog_Login.close)   
-        #self.pushButton_cancel.clicked.connect(lambda: clickedCancel)   
-        
+        # self.pushButton_cancel.clicked.connect(Dialog_Login.close)
+        self.pushButton_cancel.clicked.connect(self.cancelButton)
+
         self.horizontalLayout_3.addWidget(self.pushButton_cancel)
         self.pushButton_newUser = QtWidgets.QPushButton(self.groupBox)
         font = QtGui.QFont()
@@ -99,6 +114,9 @@ class Ui_Dialog_Login(object):
         self.pushButton_newUser.setAutoFillBackground(False)
         self.pushButton_newUser.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.pushButton_newUser.setObjectName("pushButton_newUser")
+
+        self.pushButton_newUser.clicked.connect(self.NewUserButton)
+
         self.horizontalLayout_3.addWidget(self.pushButton_newUser)
         self.pushButton_login = QtWidgets.QPushButton(self.groupBox)
         font = QtGui.QFont()
@@ -131,24 +149,18 @@ class Ui_Dialog_Login(object):
         self.label_pass.setText(_translate("Dialog_Login", " Password "))
         self.pushButton_cancel.setText(_translate("Dialog_Login", "Cancel"))
         self.pushButton_newUser.setText(_translate("Dialog_Login", "New User"))
-        self.pushButton_login.setText(_translate("Dialog_Login", "Login"))  
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------    
-'''Addition code to help Login window work as intended.
+        self.pushButton_login.setText(_translate("Dialog_Login", "Login"))
+    # ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-'''
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------    
-     
 
-        
-        
-        
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------     
 '''
 Class for New User Registration Window. 
 Pops up when user clicks on the "New User" button int the Login Window.
 It get priority as the focus and it's window can only be closed via "Cancel" button click or "Add" button click
 '''
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------  
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'Registeration_Screen.ui'
@@ -295,7 +307,7 @@ class Ui_Dialog_Register(object):
         font.setWeight(75)
         self.pushButton_rcancel.setFont(font)
         self.pushButton_rcancel.setStyleSheet("background-color: rgb(255, 255, 255);\n"
-"")
+                                              "")
         self.pushButton_rcancel.setObjectName("pushButton_rcancel")
         self.horizontalLayout_2.addWidget(self.pushButton_rcancel)
         self.pushButton_add = QtWidgets.QPushButton(self.groupBox)
@@ -336,14 +348,18 @@ class Ui_Dialog_Register(object):
         self.label_userType.setText(_translate("Dialog_Register", " Type"))
         self.pushButton_rcancel.setText(_translate("Dialog_Register", "Cancel"))
         self.pushButton_add.setText(_translate("Dialog_Register", "Add"))
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------    
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     Dialog_Login = QtWidgets.QDialog()
     ui = Ui_Dialog_Login()
     ui.setupUi(Dialog_Login)
     Dialog_Login.show()
     sys.exit(app.exec_())
+
