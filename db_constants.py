@@ -12,7 +12,7 @@ cursor.execute("INSERT INTO vehicles VALUES {}".format(entry))
 ```
 """
 
-BIRTH_ENTRY = "({regno},  '{fname}', '{lname}', '{regdate}', '{regplace}', '{gender}', '{f_fname}', '{f_lname}', '{m_fname}', '{m_lname}')"
+BIRTHS_ENTRY = "({regno},  '{fname}', '{lname}', '{regdate}', '{regplace}', '{gender}', '{f_fname}', '{f_lname}', '{m_fname}', '{m_lname}')"
 
 PERSONS_ENTRY = "('{fname}', '{lname}', '{bdate}', '{bplace}', '{address}', '{phone}')"
 
