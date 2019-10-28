@@ -19,23 +19,23 @@ class agent:
     def reg_birth(self, fname, lname, gender, bdate, bplace, mfname, mlname, 
                     ffname, flname):
         # Generate unique ID + get date
-        birth_id = uuid.uuid1()
+        birth_id = uuid.uuid1().int
         today = date.today().isoformat()
         # Get registration place
         self.cursor.execute(
-                "SELECT city FROM users WHERE users.uid = {uid}"
+                "SELECT city FROM users WHERE users.uid = '{uid}'"
                 .format(uid=self.uid))
-        reg_place = self.cursor.fetchone()['city']
+        reg_place = self.cursor.fetchone()[0]
         # Get addr + phone of mother.
         self.cursor.execute(
-                "SELECT address, phone FROM persons WHERE fname = {mfname} AND lname = {mlname}"
+                "SELECT address, phone FROM persons WHERE fname = '{mfname}' AND lname = '{mlname}'"
                 .format(mfname=mfname, mlname=mlname))
         m_info = self.cursor.fetchone()
 
         # Create person entry for the newborn.
         person_entry = PERSONS_ENTRY.format(fname=fname, lname=lname, bdate=bdate,
-                    bplace=bplace, address=m_info['address'], 
-                    phone=m_info['phone'])
+                    bplace=bplace, address=m_info[0], 
+                    phone=m_info[1])
 
         # Create birth entry for the newborn.
         birth_entry = BIRTHS_ENTRY.format(regno=birth_id, fname=fname, lname=lname, 
@@ -44,8 +44,8 @@ class agent:
 
         # Insert entries + commit.
         try:
-            cursor.execute("INSERT INTO persons VALUES {}".format(person_entry)
-            cursor.execute("INSERT INTO births VALUES {}".format(birth_entry))
+            self.cursor.execute("INSERT INTO persons VALUES {}".format(person_entry))
+            self.cursor.execute("INSERT INTO births VALUES {}".format(birth_entry))
             self.con.commit()
             return 1
 
