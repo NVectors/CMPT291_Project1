@@ -69,6 +69,7 @@ class Ui_Dialog_Login(object):
 
             # Username is registered in our Database
             if (username.lower() == uID.lower()):
+                # Check if password matches username registered in our Database
                 if (password == pID):
                     valid_dialog = QtWidgets.QMessageBox()
                     valid_dialog.setText('User is registered!')
@@ -77,7 +78,7 @@ class Ui_Dialog_Login(object):
                     error_dialog = QtWidgets.QMessageBox()
                     error_dialog.setText('Password is Incorrect!')
                     error_dialog.exec_()
-            # Password is registered in our Database
+            # Only the password is registered in our Database
             elif (password == pID):
                 error_dialog = QtWidgets.QMessageBox()
                 error_dialog.setText('Username is not registered!')
