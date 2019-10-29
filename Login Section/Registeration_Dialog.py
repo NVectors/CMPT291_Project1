@@ -27,21 +27,61 @@ class Ui_Dialog_Register(object):
         checkBox_Agent = self.checkBox_agent.isChecked()
         checkBox_Officer = self.checkBox_officer.isChecked()
 
-        if not (username and password_one and password_two and first_name and last_name and city):
-            if (checkBox_Agent is False) and (checkBox_Officer is False):
-                error_dialog = QtWidgets.QMessageBox()
-                error_dialog.setText('You typed in nothing!')
-                error_dialog.exec_()
+        if (not (username and password_one and password_two and first_name and last_name and city)) and (
+                (checkBox_Agent is False) and (checkBox_Officer is False)):
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('Incomplete!')
+            error_dialog.exec_()
+        elif not username:
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('Username is missing')
+            error_dialog.exec_()
         elif not password_one:
             error_dialog = QtWidgets.QMessageBox()
             error_dialog.setText('Password is missing')
             error_dialog.exec_()
         elif not first_name:
             error_dialog = QtWidgets.QMessageBox()
-            error_dialog.setText('First is missing')
+            error_dialog.setText('First name is missing')
             error_dialog.exec_()
-            # if (password_one == password_two):
-            # print(password_one, password_two)
+        elif not last_name:
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('Last name is missing')
+            error_dialog.exec_()
+        elif not city:
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('City is missing')
+            error_dialog.exec_()
+        elif ((checkBox_Agent is False) and (checkBox_Officer is False)):
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('Did not check mark at "Type"')
+            error_dialog.exec_()
+        elif ((checkBox_Agent is True) and (checkBox_Officer is True)):
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('Can not check mark both at "Type"')
+            error_dialog.exec_()
+        else:
+            self.register(username, password_one, password_two, first_name, last_name, city, checkBox_Agent,
+                          checkBox_Officer)
+
+    def register(self, username, password_one, password_two, first_name, last_name, city, checkBox_Agent,
+                 checkBox_Officer):
+        if (password_one != password_two):
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('Password does not match')
+            error_dialog.exec_()
+        else:
+            if (checkBox_Agent is True):
+                user_type = 'a'
+            elif (checkBox_Officer is True):
+                user_type = 'o'
+            # print (username,password_one,user_type,first_name,last_name,city)
+            values = (username, password_one, user_type, first_name, last_name, city)
+            self.cursor.execute('INSERT into users VALUES (?,?,?,?,?,?)', values)
+            self.connection.commit()
+            dialog = QtWidgets.QMessageBox()
+            dialog.setText('You are now registered!')
+            dialog.exec_()
 
     def setupUi(self, Dialog_Register):
         Dialog_Register.setObjectName("Dialog_Register")
