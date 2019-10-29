@@ -62,9 +62,12 @@ class Ui_Dialog_Login(object):
     def validity(self, username, password):
         self.cursor.execute('''Select uid, pwd FROM users ''')
         registered_users = self.cursor.fetchall()
+
         for info in registered_users:
             uID = info[0]
             pID = info[1]
+
+            # Username is registered in our Database
             if (username.lower() == uID.lower()):
                 if (password == pID):
                     valid_dialog = QtWidgets.QMessageBox()
@@ -74,6 +77,11 @@ class Ui_Dialog_Login(object):
                     error_dialog = QtWidgets.QMessageBox()
                     error_dialog.setText('Password is Incorrect!')
                     error_dialog.exec_()
+            # Password is registered in our Database
+            elif (password == pID):
+                error_dialog = QtWidgets.QMessageBox()
+                error_dialog.setText('Username is not registered!')
+                error_dialog.exec_()
 
     def setupUi(self, Dialog_Login):
         Dialog_Login.setObjectName("Dialog_Login")
