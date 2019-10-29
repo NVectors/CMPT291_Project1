@@ -1,7 +1,48 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+import sys
+import sqlite3
 
 
 class Ui_Dialog_Register(object):
+    def __init__(self):
+        # QtWidgets.QDialog.__init__(self)
+        # self.setupUi(self)
+        self.connection = sqlite3.connect('p1.db')
+        self.cursor = self.connection.cursor()
+
+    '''
+    "Cancel" button has been clicked and cancelButton() function is called to close the window.
+    '''
+
+    def cancelButton(self):
+        sys.exit()
+
+    def addButton(self):
+        username = self.lineEdit_username.text()
+        password_one = self.lineEdit_passwordOne.text()
+        password_two = self.lineEdit_passwordTwo.text()
+        first_name = self.lineEdit_firstName.text()
+        last_name = self.lineEdit_lastName.text()
+        city = self.lineEdit_city.text()
+        checkBox_Agent = self.checkBox_agent.isChecked()
+        checkBox_Officer = self.checkBox_officer.isChecked()
+
+        if not (username and password_one and password_two and first_name and last_name and city):
+            if (checkBox_Agent is False) and (checkBox_Officer is False):
+                error_dialog = QtWidgets.QMessageBox()
+                error_dialog.setText('You typed in nothing!')
+                error_dialog.exec_()
+        elif not password_one:
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('Password is missing')
+            error_dialog.exec_()
+        elif not first_name:
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('First is missing')
+            error_dialog.exec_()
+            # if (password_one == password_two):
+            # print(password_one, password_two)
+
     def setupUi(self, Dialog_Register):
         Dialog_Register.setObjectName("Dialog_Register")
         Dialog_Register.resize(640, 480)
@@ -35,46 +76,47 @@ class Ui_Dialog_Register(object):
         self.gridLayout_2.addWidget(self.label, 2, 0, 1, 1)
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
-        self.lineEdit = QtWidgets.QLineEdit(self.groupBox)
-        self.lineEdit.setObjectName("lineEdit")
-        self.gridLayout.addWidget(self.lineEdit, 0, 0, 1, 1)
-        self.lineEdit_5 = QtWidgets.QLineEdit(self.groupBox)
-        self.lineEdit_5.setObjectName("lineEdit_5")
-        self.gridLayout.addWidget(self.lineEdit_5, 4, 0, 1, 1)
+        self.lineEdit_username = QtWidgets.QLineEdit(self.groupBox)
+        self.lineEdit_username.setObjectName("lineEdit_username")
+        self.gridLayout.addWidget(self.lineEdit_username, 0, 0, 1, 1)
+        self.lineEdit_lastName = QtWidgets.QLineEdit(self.groupBox)
+        self.lineEdit_lastName.setObjectName("lineEdit_lastName")
+        self.gridLayout.addWidget(self.lineEdit_lastName, 4, 0, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.checkBox = QtWidgets.QCheckBox(self.groupBox)
+        self.checkBox_agent = QtWidgets.QCheckBox(self.groupBox)
         font = QtGui.QFont()
         font.setFamily("Lato")
         font.setPointSize(10)
         font.setBold(True)
         font.setWeight(75)
-        self.checkBox.setFont(font)
-        self.checkBox.setObjectName("checkBox")
-        self.horizontalLayout.addWidget(self.checkBox)
-        self.checkBox_2 = QtWidgets.QCheckBox(self.groupBox)
+        self.checkBox_agent.setFont(font)
+        self.checkBox_agent.setObjectName("checkBox_agent")
+        self.horizontalLayout.addWidget(self.checkBox_agent)
+        self.checkBox_officer = QtWidgets.QCheckBox(self.groupBox)
         font = QtGui.QFont()
         font.setFamily("Lato")
         font.setPointSize(10)
         font.setBold(True)
         font.setWeight(75)
-        self.checkBox_2.setFont(font)
-        self.checkBox_2.setObjectName("checkBox_2")
-        self.horizontalLayout.addWidget(self.checkBox_2)
+        self.checkBox_officer.setFont(font)
+        self.checkBox_officer.setObjectName("checkBox_officer")
+        self.horizontalLayout.addWidget(self.checkBox_officer)
         self.gridLayout.addLayout(self.horizontalLayout, 6, 0, 1, 1)
-        self.lineEdit_2 = QtWidgets.QLineEdit(self.groupBox)
-        self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.lineEdit_2.setObjectName("lineEdit_2")
-        self.gridLayout.addWidget(self.lineEdit_2, 1, 0, 1, 1)
-        self.lineEdit_3 = QtWidgets.QLineEdit(self.groupBox)
-        self.lineEdit_3.setObjectName("lineEdit_3")
-        self.gridLayout.addWidget(self.lineEdit_3, 2, 0, 1, 1)
-        self.lineEdit_4 = QtWidgets.QLineEdit(self.groupBox)
-        self.lineEdit_4.setObjectName("lineEdit_4")
-        self.gridLayout.addWidget(self.lineEdit_4, 3, 0, 1, 1)
-        self.lineEdit_6 = QtWidgets.QLineEdit(self.groupBox)
-        self.lineEdit_6.setObjectName("lineEdit_6")
-        self.gridLayout.addWidget(self.lineEdit_6, 5, 0, 1, 1)
+        self.lineEdit_passwordOne = QtWidgets.QLineEdit(self.groupBox)
+        self.lineEdit_passwordOne.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.lineEdit_passwordOne.setObjectName("lineEdit_passwordOne")
+        self.gridLayout.addWidget(self.lineEdit_passwordOne, 1, 0, 1, 1)
+        self.lineEdit_passwordTwo = QtWidgets.QLineEdit(self.groupBox)
+        self.lineEdit_passwordTwo.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.lineEdit_passwordTwo.setObjectName("lineEdit_passwordTwo")
+        self.gridLayout.addWidget(self.lineEdit_passwordTwo, 2, 0, 1, 1)
+        self.lineEdit_firstName = QtWidgets.QLineEdit(self.groupBox)
+        self.lineEdit_firstName.setObjectName("lineEdit_firstName")
+        self.gridLayout.addWidget(self.lineEdit_firstName, 3, 0, 1, 1)
+        self.lineEdit_city = QtWidgets.QLineEdit(self.groupBox)
+        self.lineEdit_city.setObjectName("lineEdit_city")
+        self.gridLayout.addWidget(self.lineEdit_city, 5, 0, 1, 1)
         self.gridLayout_2.addLayout(self.gridLayout, 0, 1, 7, 1)
         self.label_firstName = QtWidgets.QLabel(self.groupBox)
         font = QtGui.QFont()
@@ -142,8 +184,14 @@ class Ui_Dialog_Register(object):
         font.setWeight(75)
         self.pushButton_rcancel.setFont(font)
         self.pushButton_rcancel.setStyleSheet("background-color: rgb(255, 255, 255);\n"
-"")
+                                              "")
         self.pushButton_rcancel.setObjectName("pushButton_rcancel")
+
+        '''
+        Call a cancelButton() function when "Cancel" button is clicked to perfrom an action
+        '''
+        self.pushButton_rcancel.clicked.connect(self.cancelButton)
+
         self.horizontalLayout_2.addWidget(self.pushButton_rcancel)
         self.pushButton_add = QtWidgets.QPushButton(self.groupBox)
         font = QtGui.QFont()
@@ -154,6 +202,13 @@ class Ui_Dialog_Register(object):
         self.pushButton_add.setFont(font)
         self.pushButton_add.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.pushButton_add.setObjectName("pushButton_add")
+
+        '''
+        Call an addButton() function when "Add" button is clicked to perfrom an action
+
+        '''
+        self.pushButton_add.clicked.connect(self.addButton)
+
         self.horizontalLayout_2.addWidget(self.pushButton_add)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.gridLayout_3.addLayout(self.verticalLayout, 0, 0, 1, 1)
@@ -173,8 +228,8 @@ class Ui_Dialog_Register(object):
         Dialog_Register.setWindowTitle(_translate("Dialog_Register", "Registration"))
         self.groupBox.setTitle(_translate("Dialog_Register", "Register as New User"))
         self.label.setText(_translate("Dialog_Register", " Confirm Password "))
-        self.checkBox.setText(_translate("Dialog_Register", " Agent "))
-        self.checkBox_2.setText(_translate("Dialog_Register", " Officer"))
+        self.checkBox_agent.setText(_translate("Dialog_Register", " Agent "))
+        self.checkBox_officer.setText(_translate("Dialog_Register", " Officer"))
         self.label_firstName.setText(_translate("Dialog_Register", " First Name "))
         self.label_userCity.setText(_translate("Dialog_Register", " City"))
         self.label_rPass.setText(_translate("Dialog_Register", " Password"))
@@ -183,4 +238,6 @@ class Ui_Dialog_Register(object):
         self.label_userType.setText(_translate("Dialog_Register", " Type"))
         self.pushButton_rcancel.setText(_translate("Dialog_Register", "Cancel"))
         self.pushButton_add.setText(_translate("Dialog_Register", "Add"))
+
+
 import source_rc
