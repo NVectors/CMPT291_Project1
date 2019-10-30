@@ -78,11 +78,14 @@ class Ui_Dialog_Login(object):
                     error_dialog = QtWidgets.QMessageBox()
                     error_dialog.setText('Password is Incorrect!')
                     error_dialog.exec_()
-            # Only the password is registered in our Database
-            elif (password == pID):
-                error_dialog = QtWidgets.QMessageBox()
-                error_dialog.setText('Username is not registered!')
-                error_dialog.exec_()
+
+            else:
+                not_registered = True
+
+        if (not_registered == True):
+            error_dialog = QtWidgets.QMessageBox()
+            error_dialog.setText('Username is not registered!')
+            error_dialog.exec_()
 
     def setupUi(self, Dialog_Login):
         Dialog_Login.setObjectName("Dialog_Login")
