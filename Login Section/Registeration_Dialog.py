@@ -66,22 +66,34 @@ class Ui_Dialog_Register(object):
 
     def register(self, username, password_one, password_two, first_name, last_name, city, checkBox_Agent,
                  checkBox_Officer):
-        if (password_one != password_two):
-            error_dialog = QtWidgets.QMessageBox()
-            error_dialog.setText('Password does not match')
-            error_dialog.exec_()
-        else:
-            if (checkBox_Agent is True):
-                user_type = 'a'
-            elif (checkBox_Officer is True):
-                user_type = 'o'
-            # print (username,password_one,user_type,first_name,last_name,city)
-            values = (username, password_one, user_type, first_name, last_name, city)
-            self.cursor.execute('INSERT into users VALUES (?,?,?,?,?,?)', values)
-            self.connection.commit()
-            dialog = QtWidgets.QMessageBox()
-            dialog.setText('You are now registered!')
-            dialog.exec_()
+        self.cursor.execute('''Select uid FROM users ''')
+        registered_users = self.cursor.fetchall()
+
+        check = False
+        for info in registered_users:
+            if (username.lower() == info[0].lower()):
+                error_dialog = QtWidgets.QMessageBox()
+                error_dialog.setText('Username is already registered!')
+                error_dialog.exec_()
+                check = True
+
+        if (check == False):
+            if (password_one != password_two):
+                error_dialog = QtWidgets.QMessageBox()
+                error_dialog.setText('Password does not match!')
+                error_dialog.exec_()
+            else:
+                if (checkBox_Agent is True):
+                    user_type = 'a'
+                elif (checkBox_Officer is True):
+                    user_type = 'o'
+                # print (username,password_one,user_type,first_name,last_name,city)
+                values = (username, password_one, user_type, first_name, last_name, city)
+                self.cursor.execute('INSERT into users VALUES (?,?,?,?,?,?)', values)
+                self.connection.commit()
+                dialog = QtWidgets.QMessageBox()
+                dialog.setText('You are now registered!')
+                dialog.exec_()
 
     def setupUi(self, Dialog_Register):
         Dialog_Register.setObjectName("Dialog_Register")
