@@ -18,6 +18,8 @@ class agent:
 
     def reg_birth(self, fname, lname, gender, bdate, bplace, mfname, mlname, 
                     ffname, flname):
+        # TODO Convert this function to use INSERT INTO sql statements...
+
         # Generate unique ID + get date
         birth_id = uuid.uuid1().int
         today = date.today().isoformat()
@@ -33,19 +35,56 @@ class agent:
         m_info = self.cursor.fetchone()
 
         # Create person entry for the newborn.
-        person_entry = PERSONS_ENTRY.format(fname=fname, lname=lname, bdate=bdate,
-                    bplace=bplace, address=m_info[0], 
-                    phone=m_info[1])
+        person_entry = PERSONS_ENTRY.format(fname=escape(fname), lname=escape(lname), bdate=escape(bdate),
+                    bplace=escape(bplace), address=escape(m_info[0]), 
+                    phone=escape(m_info[1]))
 
         # Create birth entry for the newborn.
-        birth_entry = BIRTHS_ENTRY.format(regno=birth_id, fname=fname, lname=lname, 
-                regdate=today, regplace=reg_place, gender=gender, 
-                f_fname=ffname, f_lname=flname, m_fname=mfname, m_lname=mlname)
+        birth_entry = BIRTHS_ENTRY.format(regno=birth_id, fname=escape(fname), lname=escape(lname), 
+                regdate=escape(today), regplace=escape(reg_place), gender=escape(gender), 
+                f_fname=escape(ffname), f_lname=escape(flname), m_fname=escape(mfname), m_lname=escape(mlname))
 
         # Insert entries + commit.
         try:
             self.cursor.execute("INSERT INTO persons VALUES {}".format(person_entry))
             self.cursor.execute("INSERT INTO births VALUES {}".format(birth_entry))
+            self.con.commit()
+            return 1
+
+
+        except Exception as e:
+            # TODO Perhaps consider throwing excption here?
+            print("FAILED TO INSERT ENTRIES!!")
+            print(e)
+            self.con.rollback()
+            return -1
+
+
+    def reg_marriage(self, p1_fname, p1_lname, p2_fname, p2_lname):
+        # Generate unique ID + get date
+        regno = uuid.uuid1().int
+        today = date.today().isoformat()
+        
+        vals = MARRIAGES_ENTRY.format(regno=regno, 
+                                      regdate=escape(today),
+                                      regplace='null',
+                                      p1_fname=escape(p1_fname),
+                                      p1_lname=escape(p1_lname),
+                                      p2_fname=escape(p2_fname),
+                                      p2_lname=escape(p2_lname))
+        
+        main_statement = "INSERT INTO marriages VALUES {vals};"
+        main_statement = main_statement.format(vals=vals)
+        update_statement = "UPDATE marriages \
+                            SET regplace=(SELECT city FROM users WHERE uid={uid}) \
+                            WHERE regno={regno};".format(uid=escape(self.uid),
+                                                        regno=regno)
+
+        
+        # Insert entries + commit.
+        try:
+            self.cursor.execute(main_statement)
+            self.cursor.execute(update_statement)
             self.con.commit()
             return 1
 
