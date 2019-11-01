@@ -1,0 +1,15 @@
+<RCC>
+  <qresource prefix="Resource">
+    <file>ticButton_icon.png</file>
+    <file>car_icon.png</file>
+    <file>x_icon.png</file>
+    <file>search_icon.png</file>
+    <file>warning_icon.png</file>
+    <file>ticket_icon.png</file>
+    <file>home_icon.png</file>
+    <file>newUser_icon.png</file>
+    <file>login_background.jpg</file>
+    <file>background.jpg</file>
+    <file>menu_icon.png</file>
+  </qresource>
+</RCC>
