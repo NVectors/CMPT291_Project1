@@ -1,9 +1,11 @@
 import sys
 import sqlite3
+import random
 from PyQt5 import QtCore, QtGui, QtWidgets
 from test_registration import Ui_Dialog_Register  # Import the class for Registeration Dialog from it own seperate file
 from test_login import Ui_Dialog_Login  # Import the class for Login Dialog from it own seperate file
 from test_OfficerMenu import Ui_Dialog_oMenu
+from datetime import datetime
 
 
 class UI_Popup(QtWidgets.QMessageBox):
@@ -124,7 +126,6 @@ class UI_Register(QtWidgets.QDialog, Ui_Dialog_Register):
         self.setupUi(self)
 
         self.pushButton_rcancel.clicked.connect(self.close)
-
         self.pushButton_add.clicked.connect(self.addButton)
 
     def addButton(self):
@@ -204,29 +205,125 @@ class UI_Register(QtWidgets.QDialog, Ui_Dialog_Register):
                 dialog = QtWidgets.QMessageBox()
                 dialog.setText('You are now registered!')
                 dialog.exec_()
+                self.close()
 
 
 class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
     def __init__(self):
         self.connection = sqlite3.connect('p1.db')
         self.cursor = self.connection.cursor()
+
         super(UI_oMenu, self).__init__()
         self.setupUi(self)
 
-        # Added code to disable Close and Help button, won't work if added directly to the Class itself
-        # self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint)
-        # self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
-        # self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
-
-        # self.pushButton_check.clicked.connect(self.close)
         self.pushButton_cancel.clicked.connect(
             self.close)  # "Cancel" buttons will close the current dialog window but not the main login dialog window
         self.pushButton_cancel_2.clicked.connect(self.close)
+        self.pushButton_check.clicked.connect(self.checkButton)
+        self.pushButton_issue.clicked.connect(self.issueButton)
+        self.pushButton_find.clicked.connect(self.findButton)
 
-        # self.layoutWidget1.setVisible(False)    #Hide registered car info until we can validate user inputed registration number via our database
-        # self.groupBox_ticket.setVisible(False)  #Hide ticket section until user inputs a valid registration number
-        # self.pushButton_issue.setVisible(False) #Hide "Issue" ticket button as well
-        # self.groupBox.setVisible(False)         #Hide "Results" group box until user inputs a valid string into the provided text boxes
+        self.layoutWidget.setVisible(
+            False)  # Hide registered car info until we can validate user inputed registration number via our database
+        self.groupBox_ticket.setVisible(False)  # Hide ticket section until user inputs a valid registration number
+        self.pushButton_issue.setVisible(False)  # Hide "Issue" ticket button as well
+        self.groupBox.setVisible(
+            False)  # Hide "Results" group box until user inputs a valid string into the provided text boxes
+
+    def checkButton(self):
+        self.layoutWidget.setVisible(False)
+        self.groupBox_ticket.setVisible(False)
+        self.pushButton_issue.setVisible(False)
+
+        regNum = self.lineEdit_registration.text()
+        if ((regNum) and (regNum).isdigit()):
+            self.cursor.execute('''Select regno FROM registrations''')
+            registered_vehicles = self.cursor.fetchall()
+
+            check = False
+            for reg in registered_vehicles:
+                if (int(regNum) == reg[0]):
+                    check = True
+                    self.getInfo(int(regNum))
+
+            if check is False:
+                window = UI_Popup()
+                window.messagebox('Registeration number is not valid!')
+                window.exec_()
+
+        else:
+            window = UI_Popup()
+            window.messagebox('Invalid input')
+            window.exec_()
+        return int(regNum)
+
+    def getInfo(self, regNum):
+        self.cursor.execute('''Select vin, fname, lname FROM registrations WHERE regno=?''', (regNum,))
+        regInfo = self.cursor.fetchone()
+
+        vin = regInfo[0]
+        self.cursor.execute('''Select make, model, year, color FROM vehicles WHERE vin=?''', (vin,))
+        carInfo = self.cursor.fetchone()
+
+        self.lineEdit_name.setText(regInfo[1].capitalize() + ' ' + regInfo[2].capitalize())
+        self.lineEdit_make.setText(carInfo[0].capitalize())
+        self.lineEdit_model.setText(carInfo[1].capitalize())
+        self.lineEdit_year.setText(str(carInfo[2]))
+        self.lineEdit_colour.setText(carInfo[3].capitalize())
+        self.layoutWidget.setVisible(True)
+        self.pushButton_issue.setVisible(True)
+        self.groupBox_ticket.setVisible(True)
+
+        return regNum
+
+    def issueButton(self):
+
+        reg = self.checkButton()
+
+        vDate = self.lineEdit_vDate.text()
+        violation = self.lineEdit_violation.text()
+        fine_amount = self.lineEdit_fine.text()
+
+        if not (violation and fine_amount):
+            window = UI_Popup()
+            window.messagebox('Invalid input')
+            window.exec_()
+        elif (not violation):
+            window = UI_Popup()
+            window.messagebox('Violation is missing')
+            window.exec_()
+        elif (not fine_amount):
+            window = UI_Popup()
+            window.messagebox('Fine amount is missing')
+            window.exec_()
+        else:
+            vDate = self.lineEdit_vDate.setText(datetime.today().strftime('%Y-%m-%d'))
+
+            if ((not (violation.replace(' ', '').isalpha()) or (not fine_amount.isdigit()))):
+                window = UI_Popup()
+                window.messagebox('Invalid input')
+                window.exec_()
+            else:
+                self.addTicket(vDate, violation, fine_amount, reg)
+
+    def addTicket(self, vDate, violation, fine_amount, reg):
+        ticketNum = random.randint(100, 120)
+        self.cursor.execute('''Select tno FROM tickets''')
+        all_tickets = self.cursor.fetchall()
+
+        print(ticketNum)
+        for num in all_tickets:
+            if ticketNum == num[0]:
+                ticketNum = random.randint(100, 120)
+        print(ticketNum)
+
+        # values = (ticketNum,reg,fine_amount,violation,vDate)
+
+        # self.cursor.execute('INSERT into tickets VALUES (?,?,?,?,?)', values)
+        # self.connection.commit()
+
+    def findButton(self):
+        pass
 
 
 if __name__ == "__main__":
