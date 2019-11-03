@@ -394,7 +394,7 @@ class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
             i = 0
             while i < len(alist):
                 if alist[i] == '':
-                    alist[i] = "'%'"
+                    alist[i] = "%"
                 else:
                     i += 1
 
