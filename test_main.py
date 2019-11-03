@@ -354,6 +354,30 @@ class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
         Currently working on taking in 1 or more user inputs and searching the data base with those given values
         
         '''
+
+
+
+        '''
+        Possible Sol:
+        in your gui if the field is left blank then set it to '%';
+        then define: query = "SELECT * FROM vehicles WHERE vin LIKE {vin} AND make LIKE {make} AND model LIKE {model} AND year like {year} AND color LIKE {color}".format(vin=vin_input, 
+                                                                      make=make_input,
+                                                                      model=model_input,
+                                                                      year=year_input,
+                                                                      color=color_input)
+
+        # Then you can plunk the string query into sursor.execute()
+        # The empty values are set to % which is a wild card (just be sure that the % gets surrounded by ' ' in the actual sql statement.
+
+
+
+
+
+        Sol addapted from 'https://dba.stackexchange.com/questions/122550/search-multiple-values-in-multiple-columns'
+
+
+
+        '''
     def findButton(self):
         searchMake = self.lineEdit_make_2.text()
         searchModel = self.lineEdit_model_2.text()
