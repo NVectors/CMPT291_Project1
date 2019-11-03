@@ -97,7 +97,26 @@ class agent:
             return -1
 
 
+    def renew_reg(self, regno):
+
+        update_statement = "UPDATE registrations SET expiry = (CASE WHEN expiry <= date('now') THEN date('now', '+1 year') ELSE date(expiry, '+1 year') END) WHERE regno={regno}"
                 
+        update_statement = update_statemnt.format(regno=regno)
+
+         # Insert entries + commit.
+        try:
+            self.cursor.execute(update_statement)
+            self.con.commit()
+            return 1
+
+
+        except Exception as e:
+            # TODO Perhaps consider throwing excption here?
+            print("FAILED TO INSERT ENTRIES!!")
+            print(e)
+            self.con.rollback()
+            return -1
+
 
 
 
