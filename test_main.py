@@ -378,46 +378,55 @@ class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
 
 
         '''
+
     def findButton(self):
         searchMake = self.lineEdit_make_2.text()
         searchModel = self.lineEdit_model_2.text()
         searchYear = self.lineEdit_year_2.text()
         searchColour = self.lineEdit_colour_2.text()
-        
-        if not(searchMake or searchModel or searchYear or searchColour):
-            window = UI_Popup() 
+
+        if not (searchMake or searchModel or searchYear or searchColour):
+            window = UI_Popup()
             window.messagebox('Need atleast one input!')
-            window.exec_()            
+            window.exec_()
         else:
-            removeList = []
-            alist = [searchMake,searchModel,searchYear,searchColour]
+            alist = [searchMake, searchModel, searchYear, searchColour]
             i = 0
             while i < len(alist):
                 if alist[i] == '':
-                    del alist[i]
+                    alist[i] = "%''%"
                 else:
                     i += 1
-                    removeList.append(i)
-            print(alist, len(alist), len(removeList))
-            if len(removeList) == 4:
-                values = (",".join(str(i) for i in alist))
-                self.cursor.execute('''SELECT vin 
-                                       FROM vehicles v
-                                       WHERE v.make=?, v.model=?, v.year=?, v.colour=?;''', values[0],values[1],values[2],values[3])
-                test = self.cursor.fetchall()  
-                print(test)
-                
-            elif len(removeList) == 3:
-                value = (",".join(str(i) for i in alist))
-                print(value)
-                
-            elif len(removeList) == 2:
-                value = (", ".join(str(i) for i in alist))
-                print(value)
-                
-            elif len(removeList) == 1:
-                value = (",".join(str(i) for i in alist))
-                print(value)
+
+            print(alist, len(alist), alist[0])
+
+            make_input = str(alist[0])
+            model_input = str(alist[1])
+            year_input = str(alist[2])
+            colour_input = str(alist[3])
+
+            query = "SELECT vin FROM vehicles WHERE make LIKE {make} AND model LIKE {model} AND year like {year} AND color LIKE {color}".format(
+                make=escape(make_input), model=escape(model_input), year=escape(year_input), color=escape(colour_input))
+            self.cursor.execute(query)
+            test = self.cursor.fetchall()
+            print(test)
+
+            # self.cursor.execute("SELECT * FROM vehicles WHERE make LIKE ? AND model like ? AND year like ? AND color like ?", (make_input,model_input,year_input,colour_input,))
+            # test = self.cursor.fetchall()
+            # print(test)
+
+            # self.cursor.execute("SELECT * FROM vehicles WHERE make LIKE ?", ((make_input),))
+            # test = self.cursor.fetchall()
+            # print(test)
+
+            # if len(removeList) == 4:
+            # values = (",".join(str(i) for i in alist))
+            # self.cursor.execute('''SELECT vin
+            # FROM vehicles v
+            # WHERE v.make=?, v.model=?, v.year=?, v.colour=?;''', values[0],values[1],values[2],values[3])
+            # test = self.cursor.fetchall()
+            # print(test)
+
             
             
             
