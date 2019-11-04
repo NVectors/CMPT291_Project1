@@ -69,6 +69,7 @@ class UI_Login(QtWidgets.QDialog, Ui_Dialog_Login):
 
         self.pushButton_cancel.clicked.connect(self.close)  # self.pushButton_cancel.clicked.connect(Dialog_Login.close)
         self.pushButton_newUser.clicked.connect(self.NewUserButton)
+        self.pushButton_login.setDefault(True)
         self.pushButton_login.clicked.connect(self.loginButton)
 
     '''
@@ -134,7 +135,7 @@ class UI_Login(QtWidgets.QDialog, Ui_Dialog_Login):
                 valid_user = True
                 # Check if password matches username registered in our Database
                 if (password == pID):
-                    self.cursor.execute('''Select utype FROM users WHERE uid=?''', (username,))
+                    self.cursor.execute('''Select utype FROM users WHERE uid=?''', (username.lower(),))
                     user_type = self.cursor.fetchone()
 
                     if (user_type[0].lower() == 'o'):
