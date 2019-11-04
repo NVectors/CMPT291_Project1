@@ -67,7 +67,7 @@ class UI_Login(QtWidgets.QDialog, Ui_Dialog_Login):
         super(UI_Login, self).__init__()
         self.setupUi(self)
         
-        self.connection = sqlite3.connect('p1.db') #<---------------- Can't hard code database
+        self.connection = sqlite3.connect(sys.argv[0])
         self.cursor = self.connection.cursor()
         
         self.pushButton_cancel.clicked.connect(self.close)  # self.pushButton_cancel.clicked.connect(Dialog_Login.close)
@@ -145,7 +145,7 @@ class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
     
     def __init__(self):
         REGISTRATION_NUM = 0
-        self.connection = sqlite3.connect('po1.db')
+        self.connection = sqlite3.connect(sys.argv[0])
         self.cursor = self.connection.cursor()
         
         super(UI_oMenu, self).__init__()
