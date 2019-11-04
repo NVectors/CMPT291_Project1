@@ -119,6 +119,33 @@ class agent:
 
 
 
+    def proc_bill_of_sale(self, vin, f_name_cur, l_name_cur, f_name_new, l_name_new, plate):
+
+        update_statement = "UPDATE registrations SET fname={fname_new}, lname={lname_new}, plate={plate} where vin={vin} AND fname={fname_cur} AND lname={lname_cur}"
+        update_statement = update_statement.format(fname_new=escape(f_name_new), 
+                                                   lname_new=escape(l_name_new),
+                                                   plate=escape(plate),
+                                                   vin=vin,
+                                                   fname_cur=escape(f_name_cur),
+                                                   lname_cur=escape(l_name_cur))
+
+        # Insert entries + commit.
+        try:
+            self.cursor.execute(update_statement)
+            self.con.commit()
+            return 1
+
+
+        except Exception as e:
+            # TODO Perhaps consider throwing excption here?
+            print("FAILED TO INSERT ENTRIES!!")
+            print(e)
+            self.con.rollback()
+            return -1
+
+
+
+
 
 
 
