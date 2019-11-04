@@ -1,11 +1,48 @@
 import sys
 import sqlite3
 import random
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from test_registration import Ui_Dialog_Register  # Import the class for Registeration Dialog from it own seperate file
 from test_login import Ui_Dialog_Login  # Import the class for Login Dialog from it own seperate file
 from test_OfficerMenu import Ui_Dialog_oMenu
 from datetime import datetime
+from functools import partial
+
+from db_constants import *
+
+
+class UI_List(QtWidgets.QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi()
+
+    def setupUi(self):
+        global REG_LIST
+        self.setWindowTitle('List')
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/Resource/car_icon.png"), QtGui.QIcon.Normal)
+        self.setWindowIcon(icon)
+        self.layout = QtWidgets.QVBoxLayout()
+        self.alist = QtWidgets.QListWidget()
+        self.label = QtWidgets.QLabel()
+        self.label.setFont(QtGui.QFont("Lato", 15))
+        self.layout.addWidget(self.label)
+
+    def test(self, regList):
+        row = self.alist.currentRow()
+        try:
+            currentRow = regList[row]
+            text = ("Issued: " + str(currentRow[6]) + ', Expires: ' + str(currentRow[7]) + ', Name: ' + str(
+                currentRow[8]).capitalize() + ' ' + str(currentRow[9]).capitalize())
+            self.label.setText(text)
+        except IndexError:
+            window = UI_Popup()
+            window.messagebox('Error')
+            window.exec_()
+    # def row_clicked(self):
+    # item = self.alist.currentItem()
+    # self.label.setText(str(item.text()))
 
 
 class UI_Popup(QtWidgets.QMessageBox):
@@ -209,8 +246,10 @@ class UI_Register(QtWidgets.QDialog, Ui_Dialog_Register):
 
 
 class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
+
     def __init__(self):
-        self.connection = sqlite3.connect('p1.db')
+        REGISTRATION_NUM = 0
+        self.connection = sqlite3.connect('po1.db')
         self.cursor = self.connection.cursor()
 
         super(UI_oMenu, self).__init__()
@@ -230,10 +269,28 @@ class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
         self.groupBox.setVisible(
             False)  # Hide "Results" group box until user inputs a valid string into the provided text boxes
 
-    def checkButton(self):
+        self.tabWidget.currentChanged.connect(self.tabChanged)
+
+    def tabChanged(self):
         self.layoutWidget.setVisible(False)
         self.groupBox_ticket.setVisible(False)
         self.pushButton_issue.setVisible(False)
+        self.lineEdit_registration.setText('')
+        self.lineEdit_make_2.setText('')
+        self.lineEdit_model_2.setText('')
+        self.lineEdit_year_2.setText('')
+        self.lineEdit_colour_2.setText('')
+
+    def checkButton(self):
+        global REGISTRATION_NUM
+
+        self.layoutWidget.setVisible(False)
+        self.groupBox_ticket.setVisible(False)
+        self.pushButton_issue.setVisible(False)
+        self.lineEdit_vDate.setText('')
+        self.lineEdit_violation.setText('')
+        self.lineEdit_fine.setText('')
+        self.lineEdit_ticNum.setText('')
 
         regNum = self.lineEdit_registration.text()
         if ((regNum) and (regNum).isdigit()):
@@ -244,6 +301,7 @@ class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
             for reg in registered_vehicles:
                 if (int(regNum) == reg[0]):
                     check = True
+                    REGISTRATION_NUM = int(regNum)
                     self.getInfo(int(regNum))
 
             if check is False:
@@ -255,7 +313,6 @@ class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
             window = UI_Popup()
             window.messagebox('Invalid input')
             window.exec_()
-        return int(regNum)
 
     def getInfo(self, regNum):
         self.cursor.execute('''Select vin, fname, lname FROM registrations WHERE regno=?''', (regNum,))
@@ -274,12 +331,8 @@ class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
         self.pushButton_issue.setVisible(True)
         self.groupBox_ticket.setVisible(True)
 
-        return regNum
-
     def issueButton(self):
-
-        reg = self.checkButton()
-
+        reg = REGISTRATION_NUM
         vDate = self.lineEdit_vDate.text()
         violation = self.lineEdit_violation.text()
         fine_amount = self.lineEdit_fine.text()
@@ -296,34 +349,239 @@ class UI_oMenu(QtWidgets.QDialog, Ui_Dialog_oMenu):
             window = UI_Popup()
             window.messagebox('Fine amount is missing')
             window.exec_()
-        else:
-            vDate = self.lineEdit_vDate.setText(datetime.today().strftime('%Y-%m-%d'))
-
+        else:  # Inputs are given
             if ((not (violation.replace(' ', '').isalpha()) or (not fine_amount.isdigit()))):
                 window = UI_Popup()
                 window.messagebox('Invalid input')
                 window.exec_()
             else:
+                if (vDate):
+                    try:
+                        date = time.strptime(vDate, '%Y-%m-%d')
+                    except:
+                        window = UI_Popup()
+                        window.messagebox('Date format must be "%Y-%m-%d"')
+                        window.exec_()
+                else:
+                    vDate = datetime.today().strftime('%Y-%m-%d')
+                    self.lineEdit_vDate.setText(vDate)
                 self.addTicket(vDate, violation, fine_amount, reg)
 
     def addTicket(self, vDate, violation, fine_amount, reg):
-        ticketNum = random.randint(100, 120)
         self.cursor.execute('''Select tno FROM tickets''')
         all_tickets = self.cursor.fetchall()
+        list_ticNum = []
+        for i in all_tickets:
+            list_ticNum.append(i[0])
 
-        print(ticketNum)
-        for num in all_tickets:
-            if ticketNum == num[0]:
-                ticketNum = random.randint(100, 120)
-        print(ticketNum)
+        ticketNum = random.randint(100, 200)
+        while ticketNum in list_ticNum:
+            ticketNum = random.randint(100, 200)
+        self.lineEdit_ticNum.setText(str(ticketNum))
 
-        # values = (ticketNum,reg,fine_amount,violation,vDate)
+        values = (ticketNum, reg, fine_amount, violation, vDate)
+        self.cursor.execute('INSERT into tickets VALUES (?,?,?,?,?)', values)
+        self.connection.commit()
 
-        # self.cursor.execute('INSERT into tickets VALUES (?,?,?,?,?)', values)
-        # self.connection.commit()
+        self.cursor.execute('''Select * FROM tickets WHERE tno=?''', (ticketNum,))
+        user_type = self.cursor.fetchone()
+
+        window = UI_Popup()
+        window.messagebox('Ticket is issued')
+        window.exec_()
+
+        '''
+        Currently working on taking in 1 or more user inputs and searching the data base with those given values
+
+        '''
 
     def findButton(self):
-        pass
+        global REG_LIST
+        searchMake = self.lineEdit_make_2.text()
+        searchModel = self.lineEdit_model_2.text()
+        searchYear = self.lineEdit_year_2.text()
+        searchColour = self.lineEdit_colour_2.text()
+
+        if not (searchMake or searchModel or searchYear or searchColour):
+            window = UI_Popup()
+            window.messagebox('Need atleast one input!')
+            window.exec_()
+        else:
+            alist = [searchMake, searchModel, searchYear, searchColour]
+            i = 0
+            while i < len(alist):
+                if alist[i] == '':
+                    alist[i] = "%"
+                else:
+                    i += 1
+
+            make_input = str(alist[0])
+            model_input = str(alist[1])
+            year_input = str(alist[2])
+            colour_input = str(alist[3])
+
+            query = "SELECT * FROM vehicles WHERE make LIKE {make} AND model LIKE {model} AND year like {year} AND color LIKE {color}".format(
+                make=escape(make_input), model=escape(model_input), year=escape(year_input), color=escape(colour_input))
+            self.cursor.execute(query)
+            result_list = self.cursor.fetchall()
+
+            vin_list = []
+            matching_list = []
+            most_recent_reg = []
+            for vin in result_list:
+                vin_list.append(vin[0])
+                self.cursor.execute(
+                    '''Select plate, regdate, expiry, fname, lname FROM registrations WHERE vin=? ORDER BY regdate DESC''',
+                    (vin[0],))
+                reg_list = self.cursor.fetchall()
+                for info in reg_list:
+                    matching_list.append(vin + info)
+                most_recent = matching_list.pop(0)
+                most_recent_reg.append(most_recent)
+                del matching_list[:]
+
+            if len(most_recent_reg) <= 4:
+                count = 0
+                for i in most_recent_reg:
+                    count += 1
+                if count == 0:
+                    self.lineEdit_1.setText('')
+                    self.lineEdit_2.setText('')
+                    self.lineEdit_3.setText('')
+                    self.lineEdit_4.setText('')
+                    self.lineEdit_5.setText('')
+                    self.lineEdit_6.setText('')
+                    self.lineEdit_7.setText('')
+                    self.lineEdit_8.setText('')
+                elif count == 1:
+                    text1 = ('Found: ' + (str(most_recent_reg[0][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[0][2])).capitalize() + ', ' + (
+                                 str(most_recent_reg[0][3])).capitalize() + ', ' + (
+                                 str(most_recent_reg[0][4])).capitalize() + ', ' + str(most_recent_reg[0][5]))
+                    text2 = ('Active: ' + (str(most_recent_reg[0][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[0][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[0][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[0][9])).capitalize())
+                    self.lineEdit_1.setText(text1)
+                    self.lineEdit_2.setText(text2)
+                    self.groupBox.setVisible(True)
+                elif count == 2:
+                    text = ('Found: ' + (str(most_recent_reg[0][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[0][2])).capitalize() + ', ' + (
+                                str(most_recent_reg[0][3])).capitalize() + ', ' + (
+                                str(most_recent_reg[0][4])).capitalize() + ', ' + str(most_recent_reg[0][5]))
+                    text2 = ('Active: ' + (str(most_recent_reg[0][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[0][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[0][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[0][9])).capitalize())
+                    self.lineEdit_1.setText(text)
+                    self.lineEdit_2.setText(text2)
+
+                    text3 = ('Found: ' + (str(most_recent_reg[1][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[1][2])).capitalize() + ', ' + (
+                                 str(most_recent_reg[1][3])).capitalize() + ', ' + (
+                                 str(most_recent_reg[1][4])).capitalize() + ', ' + str(most_recent_reg[1][5]))
+                    text4 = ('Active: ' + (str(most_recent_reg[1][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[1][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[1][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[1][9])).capitalize())
+                    self.lineEdit_3.setText(text3)
+                    self.lineEdit_4.setText(text4)
+                    self.groupBox.setVisible(True)
+                elif count == 3:
+                    text = ('Found: ' + (str(most_recent_reg[0][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[0][2])).capitalize() + ', ' + (
+                                str(most_recent_reg[0][3])).capitalize() + ', ' + (
+                                str(most_recent_reg[0][4])).capitalize() + ', ' + str(most_recent_reg[0][5]))
+                    text2 = ('Active: ' + (str(most_recent_reg[0][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[0][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[0][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[0][9])).capitalize())
+                    self.lineEdit_1.setText(text)
+                    self.lineEdit_2.setText(text2)
+
+                    text3 = ('Found: ' + (str(most_recent_reg[1][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[1][2])).capitalize() + ', ' + (
+                                 str(most_recent_reg[1][3])).capitalize() + ', ' + (
+                                 str(most_recent_reg[1][4])).capitalize() + ', ' + str(most_recent_reg[1][5]))
+                    text4 = ('Active: ' + (str(most_recent_reg[1][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[1][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[1][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[1][9])).capitalize())
+                    self.lineEdit_3.setText(text3)
+                    self.lineEdit_4.setText(text4)
+
+                    text5 = ('Found: ' + (str(most_recent_reg[2][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[2][2])).capitalize() + ', ' + (
+                                 str(most_recent_reg[2][3])).capitalize() + ', ' + (
+                                 str(most_recent_reg[2][4])).capitalize() + ', ' + str(most_recent_reg[2][5]))
+                    text6 = ('Active: ' + (str(most_recent_reg[2][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[2][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[2][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[2][9])).capitalize())
+                    self.lineEdit_5.setText(text5)
+                    self.lineEdit_6.setText(text6)
+                    self.groupBox.setVisible(True)
+                elif count == 4:
+                    text = ('Found: ' + (str(most_recent_reg[0][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[0][2])).capitalize() + ', ' + (
+                                str(most_recent_reg[0][3])).capitalize() + ', ' + (
+                                str(most_recent_reg[0][4])).capitalize() + ', ' + str(most_recent_reg[0][5]))
+                    text2 = ('Active: ' + (str(most_recent_reg[0][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[0][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[0][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[0][9])).capitalize())
+                    self.lineEdit_1.setText(text)
+                    self.lineEdit_2.setText(text2)
+
+                    text3 = ('Found: ' + (str(most_recent_reg[1][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[1][2])).capitalize() + ', ' + (
+                                 str(most_recent_reg[1][3])).capitalize() + ', ' + (
+                                 str(most_recent_reg[1][4])).capitalize() + ', ' + str(most_recent_reg[1][5]))
+                    text4 = ('Active: ' + (str(most_recent_reg[1][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[1][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[1][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[1][9])).capitalize())
+                    self.lineEdit_3.setText(text3)
+                    self.lineEdit_4.setText(text4)
+
+                    text5 = ('Found: ' + (str(most_recent_reg[2][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[2][2])).capitalize() + ', ' + (
+                                 str(most_recent_reg[2][3])).capitalize() + ', ' + (
+                                 str(most_recent_reg[2][4])).capitalize() + ', ' + str(most_recent_reg[2][5]))
+                    text6 = ('Active: ' + (str(most_recent_reg[2][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[2][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[2][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[2][9])).capitalize())
+                    self.lineEdit_5.setText(text5)
+                    self.lineEdit_6.setText(text6)
+
+                    text7 = ('Found: ' + (str(most_recent_reg[3][1])).capitalize() + ', ' + (
+                        str(most_recent_reg[3][2])).capitalize() + ', ' + (
+                                 str(most_recent_reg[3][3])).capitalize() + ', ' + (
+                                 str(most_recent_reg[3][4])).capitalize() + ', ' + str(most_recent_reg[3][5]))
+                    text8 = ('Active: ' + (str(most_recent_reg[3][6])).capitalize() + ', Expires: ' + (
+                        str(most_recent_reg[3][7])).capitalize() + ', Registered by: ' + (
+                                 str(most_recent_reg[3][8])).capitalize() + ' ' + (
+                                 str(most_recent_reg[3][9])).capitalize())
+                    self.lineEdit_7.setText(text7)
+                    self.lineEdit_8.setText(text8)
+                    self.groupBox.setVisible(True)
+            else:
+                window = UI_List()
+
+                count = 1
+                for item in most_recent_reg:
+                    correct_text = str(item[1].capitalize() + ', ' + str(item[2]).capitalize() + ', ' + str(
+                        item[3]).capitalize() + ', ' + str(item[4]).capitalize() + ', ' + str(item[5]))
+                    window.alist.insertItem(count, correct_text)
+                    count += 1
+
+                window.layout.addWidget(window.alist)
+                window.setLayout(window.layout)
+                window.alist.clicked.connect(partial(window.test, most_recent_reg))
+
+                window.exec_()
 
 
 if __name__ == "__main__":
