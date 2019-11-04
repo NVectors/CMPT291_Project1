@@ -24,6 +24,8 @@ def start_ui(connection, cursor, uid):
 class Ui_MainWindow(object):
     def __init__(self, usr):
         self.usr =usr
+        self.cursor = self.connection.cursor()      
+
 
 
     def setupUi(self, MainWindow):
