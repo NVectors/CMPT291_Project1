@@ -9,11 +9,17 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import agents_backend
+import sys
+import sqlite3
 
 
-def start_ui(connection, cursor, uid):
+def start_ui():
     import sys
-    usr = agents_backend.agent(connection, cursor, uid)
+    connection = sqlite3.connect(sys.argv[1])
+    cursor = connection.cursor()
+    usr = agents_backend.agent(connection, cursor, sys.argv[2])
+    
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow(usr)
@@ -23,7 +29,7 @@ def start_ui(connection, cursor, uid):
 
 class Ui_MainWindow(object):
     def __init__(self, usr):
-        self.usr =usr
+        self.usr = usr
 
 
     def setupUi(self, MainWindow):
@@ -192,7 +198,6 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(3)
-        self.pushButton.clicked.connect(MainWindow.driver_abstract_search)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         
         # References functions 4 - 6
@@ -358,5 +363,8 @@ class Ui_MainWindow(object):
         list = str(num_tickets)," ", str(num_notices)," ", str(points_all), " ", str(points2y)
         list = "".join(list)
         self.results_06.addItem(list)    
-        
- 
+
+
+
+if __name__ == "__main__":
+    start_ui()

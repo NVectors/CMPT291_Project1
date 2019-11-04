@@ -10,6 +10,9 @@ from functools import partial
 from db_constants import *                      # Needed for findButton() SQL search code
 
 import agents_ui
+import agents_backend
+import os
+
 
 '''
 Class for Dialog Window that displays a list when there more than 4 matches in Officer Q2, Search for Car
@@ -129,7 +132,17 @@ class UI_Login(QtWidgets.QDialog, Ui_Dialog_Login):
                         window.exec_()      
                         
                     elif (user_type[0].lower() == 'a'):     #Open new Dialog Window if user type is 'a' for Agent
-                        agents_ui.start_ui(self.connection, self.cursor, uID)
+                        #agents_ui.start_ui(self.connection, self.cursor, uID)
+
+                        os.system("python3 agents_ui.py {} {}".format(sys.argv[1], uID))
+                        exit()
+
+                        #usr = agents_backend.agent(self.connection, self.cursor, uID)
+                        #MainWindow = QtWidgets.QMainWindow()
+                        #window = agents_ui.Ui_MainWindow(usr)
+                        #window.setupUi(MainWindow)
+                        #MainWindow.show()
+
 
                 else:
                     window = UI_Popup() 
