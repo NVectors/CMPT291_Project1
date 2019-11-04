@@ -194,6 +194,16 @@ class Ui_MainWindow(object):
         self.tabWidget.setCurrentIndex(3)
         self.pushButton.clicked.connect(MainWindow.driver_abstract_search)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        
+        # References functions 4 - 6
+        # 04
+        self.submit_4.clicked.connect(self.submitNUM04)    
+        
+        # 05
+        self.submit_5.clicked.connect(self.submitNUM05)    
+        
+        # 06
+        self.submit_06.clicked.connect(self.submitNUM06)        
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -234,3 +244,119 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.widget), _translate("MainWindow", "Renew Vehicle Registration"))
 
 
+    def submitNUM04(self): # pretty much done
+        vin_no = self.vin_input.text()
+        #vin_no = (''.join(vin_no))
+        one = True
+        
+        first_curr = (self.fname_current.text()),
+        last_curr = (self.lname_current.text()),
+        
+        first_new = self.fname_new.text(),
+        last_new = (self.lname_new.text()),
+        
+        plate_no = self.plate_num.text()
+        two = True
+        
+        three = False # checks if plate and vin if they are digits
+        
+        curr_date = (date.today()),
+        new_expiry = new_expiry = date.today() - timedelta(days = -365) # same day as today + 1yr
+        new_expiry = (new_expiry),
+        
+        # check if input box empty/full of spaces 
+        if not vin_no or vin_no.isspace() == True:  # checks if vin is empty 
+            one = False
+        if not plate_no or plate_no.isspace() == True:  # checks if plate_no is empty
+            two = False           
+                
+        
+        # first and last name of current owner of vehicle to confirm ownership of alleged current owner
+        try:
+            stuff = vin_no, curr_date
+            self.cursor.execute("SELECT fname FROM registrations WHERE vin =? AND expiry >?", stuff) 
+            real_first_current = self.cursor.fetchone()
+            self.cursor.execute("SELECT lname FROM registrations WHERE vin =? AND expiry >?", stuff) 
+            real_last_current = self.cursor.fetchone()
+            name = False
+        except:
+            return 0
+        
+
+        if ((real_first_current == first_curr) and (real_last_current == last_curr)):
+            name = True # checks to see if what's in the box matches the real name based on the vin        
+                
+        if (one == False and two == False and name == True):
+            # exp date for current registration change
+            self.cursor.execute("UPDATE registrations WHERE vin =? SET expiry =?", stuff)
+        
+            # new registration for new owner
+            registration_entry = REGISTRATIONS_ENTRY.format(regno = uuid.uuid1().int, regdate = curr_date, expiry = new_expiry, plate = plate_no, vin = vin_no,
+                                                        fname = first_new, lname = last_new)
+            
+            
+            self.cursor.execute("INSERT INTO registrations VALUES{}".format(registration_entry))
+            connection.commit()
+        else: # transfer cannot be made, no error message required since not specified in the system functionalities description
+            pass 
+                          
+                                       
+                                       
+    def submitNUM05(self): # almost done
+        ticket_no = self.ticket_num.text()
+        input_amount = self.amount.text()
+              
+        
+        if (ticket_no.isdigit() != True or not ticket_no or ticket_no.isspace() == True): # checks for number input and if ticket_no is left blank
+            self.result_5.addItem("Error")
+        
+        else:
+            self.cursor.execute("SELECT amount FROM payments WHERE tno =?", (ticket_no,)) 
+            amount_remaining = self.cursor.fetchone()
+            if(int(input_amount) > int(amount_remaining)): #tno must be a number and input amount must not exceed amount due (cannot overpay)
+                self.result_5.addItem("Error")
+                
+            new_amount = int(amount_remaining) - int(input_amount) # Finds new amount owed
+            self.cursor.execute("UPDATE payments WHERE tno =", ticket_no, "SET amount =", new_amount)
+            connection.commit()
+            
+            
+            #set pdate to current date            
+            curr_date = date.today()
+            self.cursor.execute("UPDATE payments WHERE tno =", ticket_no," SET pdate = ",curr_date)
+            connection.commit()
+            
+    def submitNUM06(self): 
+        # The last requirement to see more should be satisfied as at least 5
+        # should be visable, to which point a scroll wheel will appear, to assist in viewing
+        # further tickets (if they exist)
+        
+        first = self.fname_06.text()
+        last = self.lname_06.text()
+        curr_date = date.today()
+        
+        val01 = (first, last)
+        self.cursor.execute("SELECT regno FROM registrations WHERE fname =? AND lname =?", val01)
+        regno = self.cursor.fetchone()
+        
+        self.cursor.execute("SELECT regno FROM registrations WHERE fname =? AND lname=?", val01) # number of tickets
+        regno = self.cursor.fetchone()
+        self.cursor.execute("SELECT COUNT(tno) FROM tickets WHERE regno=?", (regno,)) # number of tickets
+        num_tickets = self.cursor.fetchone()
+        
+        self.cursor.execute("SELECT COUNT(DISTINCT desc) FROM demeritNotices WHERE fname=? AND lname =?", val01) # number of demerit notices
+        num_notices = self.cursor.fetchone()        
+        
+        self.cursor.execute("SELECT points FROM demeritNotices WHERE demeritNotices.fname =? AND demeritNotices.lname =?", val01) # number of demerit points from all time
+        points_all = self.cursor.fetchone()
+        
+        val02 = (first, last, curr_date)
+        self.cursor.execute("SELECT points FROM demeritNotices WHERE demeritNotices.fname =? AND demeritNotices.lname =? AND ddate >?", val02) # number of demerit points from all time
+        points2y = self.cursor.fetchone()
+        
+        self.results_06.addItem("Number of tickets, Number of Notices, Total Points, Points (Last 2y)")
+        list = str(num_tickets)," ", str(num_notices)," ", str(points_all), " ", str(points2y)
+        list = "".join(list)
+        self.results_06.addItem(list)    
+        
+ 
