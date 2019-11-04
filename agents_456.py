@@ -148,28 +148,43 @@ class Ui_MainWindow(object):
 
     def submitNUM04(self): # pretty much done
         vin_no = self.vin_input.text()
+        #vin_no = (''.join(vin_no))
+        one = True
         
-        first_curr = self.fname_current.text()
-        last_curr = self.lname_current.text()
+        first_curr = (self.fname_current.text()),
+        last_curr = (self.lname_current.text()),
         
-        first_new = self.fname_new.text()
-        last_new = self.lname_new.text()
+        first_new = self.fname_new.text(),
+        last_new = (self.lname_new.text()),
         
         plate_no = self.plate_num.text()
+        two = True
         
-        curr_date = date.today()
+        curr_date = (date.today()),
         new_expiry = new_expiry = date.today() - timedelta(days = -365) # same day as today + 1yr
+        new_expiry = (new_expiry),
         
+        # check if input box empty/full of spaces 
+        if not vin_no or vin_no.isspace() == True:  # checks if vin is empty 
+            one = False
+        if not plate_no or plate_no.isspace() == True:  # checks if plate_no is empty
+            two = False           
+                
         
         # first and last name of current owner of vehicle to confirm ownership of alleged current owner
-        self.cursor.execute("SELECT fname FROM registrations WHERE vin =", vin_no)
+        self.cursor.execute("SELECT fname FROM registrations WHERE vin =? AND expiry >?", (vin_no, curr_date)) 
         real_first_current = self.cursor.fetchone()
-        self.cursor.execute("SELECT lname FROM registrations WHERE vin =", vin_no)
+        self.cursor.execute("SELECT lname FROM registrations WHERE vin =? AND expiry >?", (vin_no, curr_date,)) 
         real_last_current = self.cursor.fetchone()
+        name = False
         
-        if (real_first_current == first_curr) and (real_last_current == last_curr):
+
+        if ((real_first_current == first_curr) and (real_last_current == last_curr)):
+            name = True # checks to see if what's in the box matches the real name based on the vin        
+                
+        if (one == False and two == False and name == True):
             # exp date for current registration change
-            self.cursor.execute("UPDATE registrations WHERE vin =", vin_no, "SET expiry =", curr_date)
+            self.cursor.execute("UPDATE registrations WHERE vin =? SET expiry =?", (vin_no, curr_date,))
         
             # new registration for new owner
             registration_entry = REGISTRATIONS_ENTRY.format(regno = uuid.uuid1().int, regdate = curr_date, expiry = new_expiry, plate = plate_no, vin = vin_no,
@@ -188,7 +203,7 @@ class Ui_MainWindow(object):
         input_amount = self.amount.text()
               
         
-        if (ticket_no.isdigit() != True): 
+        if (ticket_no.isdigit() != True or not ticket_no or ticket_no.isspace() == True): # checks for number input and if ticket_no is left blank
             self.result_5.addItem("Error")
         
         else:
@@ -224,7 +239,7 @@ class Ui_MainWindow(object):
         #self.cursor.execute("SELECT ") # number of demerit notices
         #num_notices = 
         
-        self.cursor.execute("SELECT points FROM demeritNotices WHERE demeritNotices.fname =",first,"AND demeritNotices.lname =", last) # number of demerit points from all time
+        self.cursor.execute("SELECT points FROM demeritNotices WHERE demeritNotices.fname =? AND demeritNotices.lname =?", (first,last,)) # number of demerit points from all time
         points_all = self.cursor.fetchone()
         #self.cursor.execute("SELECT points FROM demeritNotices WHERE fname =",first,"AND lname =", last, "AND ddate >") # number of demerit points from last 2 years
         #points_two = self.cursor.fetchone()
