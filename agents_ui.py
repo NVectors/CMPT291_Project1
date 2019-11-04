@@ -8,9 +8,24 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import agents_backend
 
+
+def start_ui(connection, cursor, uid):
+    import sys
+    usr = agents_backend.agent(connection, cursor, uid)
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow(usr)
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
 
 class Ui_MainWindow(object):
+    def __init__(self, usr):
+        self.usr =usr
+
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(542, 389)
@@ -219,11 +234,3 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.widget), _translate("MainWindow", "Renew Vehicle Registration"))
 
 
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
