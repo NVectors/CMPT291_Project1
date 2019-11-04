@@ -17,4 +17,5 @@ From https://doc.qt.io/qtforpython/:
   a)https://doc.qt.io/qtforpython/PySide2/QtWidgets/index.html#module-PySide2.QtWidgets
   b)https://doc.qt.io/qt-5/qdialog.html
   c)https://doc.qt.io/qt-5/qlistwidget.html
-  d)https://pypi.org/project/ui-to-py/
+Converting .ui to .py
+  a)https://pypi.org/project/ui-to-py/
