@@ -29,7 +29,9 @@ def start_ui():
 
 class Ui_MainWindow(object):
     def __init__(self, usr):
+
         self.usr = usr
+
 
 
     def setupUi(self, MainWindow):
@@ -364,7 +366,6 @@ class Ui_MainWindow(object):
         list = "".join(list)
         self.results_06.addItem(list)    
 
-
-
 if __name__ == "__main__":
     start_ui()
+
