@@ -94,9 +94,9 @@ class Ui_MainWindow(object):
         self.submit_06 = QtWidgets.QPushButton(self.tab_03)
         self.submit_06.setGeometry(QtCore.QRect(150, 30, 56, 17))
         self.submit_06.setObjectName("submit_06")
-        self.next_06 = QtWidgets.QPushButton(self.tab_03)
-        self.next_06.setGeometry(QtCore.QRect(450, 290, 56, 17))
-        self.next_06.setObjectName("next_06")
+        #self.next_06 = QtWidgets.QPushButton(self.tab_03)
+        #self.next_06.setGeometry(QtCore.QRect(450, 290, 56, 17))
+        #self.next_06.setObjectName("next_06")
         self.tabWidget.addTab(self.tab_03, "")
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -142,7 +142,7 @@ class Ui_MainWindow(object):
         self.fname_06.setText(_translate("MainWindow", "First Name"))
         self.lname_06.setText(_translate("MainWindow", "Last Name"))
         self.submit_06.setText(_translate("MainWindow", "Submit"))
-        self.next_06.setText(_translate("MainWindow", "Next 5"))
+        #self.next_06.setText(_translate("MainWindow", "Next 5"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_03), _translate("MainWindow", "Get a driver abstract"))
 
 
@@ -160,6 +160,8 @@ class Ui_MainWindow(object):
         plate_no = self.plate_num.text()
         two = True
         
+        three = False # checks if plate and vin if they are digits
+        
         curr_date = (date.today()),
         new_expiry = new_expiry = date.today() - timedelta(days = -365) # same day as today + 1yr
         new_expiry = (new_expiry),
@@ -172,11 +174,15 @@ class Ui_MainWindow(object):
                 
         
         # first and last name of current owner of vehicle to confirm ownership of alleged current owner
-        self.cursor.execute("SELECT fname FROM registrations WHERE vin =? AND expiry >?", (vin_no, curr_date)) 
-        real_first_current = self.cursor.fetchone()
-        self.cursor.execute("SELECT lname FROM registrations WHERE vin =? AND expiry >?", (vin_no, curr_date,)) 
-        real_last_current = self.cursor.fetchone()
-        name = False
+        try:
+            stuff = vin_no, curr_date
+            self.cursor.execute("SELECT fname FROM registrations WHERE vin =? AND expiry >?", stuff) 
+            real_first_current = self.cursor.fetchone()
+            self.cursor.execute("SELECT lname FROM registrations WHERE vin =? AND expiry >?", stuff) 
+            real_last_current = self.cursor.fetchone()
+            name = False
+        except:
+            return 0
         
 
         if ((real_first_current == first_curr) and (real_last_current == last_curr)):
@@ -184,7 +190,7 @@ class Ui_MainWindow(object):
                 
         if (one == False and two == False and name == True):
             # exp date for current registration change
-            self.cursor.execute("UPDATE registrations WHERE vin =? SET expiry =?", (vin_no, curr_date,))
+            self.cursor.execute("UPDATE registrations WHERE vin =? SET expiry =?", stuff)
         
             # new registration for new owner
             registration_entry = REGISTRATIONS_ENTRY.format(regno = uuid.uuid1().int, regdate = curr_date, expiry = new_expiry, plate = plate_no, vin = vin_no,
@@ -222,31 +228,38 @@ class Ui_MainWindow(object):
             self.cursor.execute("UPDATE payments WHERE tno =", ticket_no," SET pdate = ",curr_date)
             connection.commit()
             
-    def submitNUM06(self): # abondoned to the wilds 
-        # NOTE, next button on the ui is a remenent of something I was going to use, you can completely discard it, the last requirement to 
-        # see more should be satisfied as at least 5 should be visable, to which point a scroll wheel will appear, to assist in viewing
+    def submitNUM06(self): 
+        # The last requirement to see more should be satisfied as at least 5
+        # should be visable, to which point a scroll wheel will appear, to assist in viewing
         # further tickets (if they exist)
         
         first = self.fname_06.text()
         last = self.lname_06.text()
         curr_date = date.today()
         
-        self.cursor.execute("SELECT regno FROM registrations WHERE fname =", first," AND lname =", last)
+        val01 = (first, last)
+        self.cursor.execute("SELECT regno FROM registrations WHERE fname =? AND lname =?", val01)
         regno = self.cursor.fetchone()
         
-        #self.cursor.execute("SELECT ") # number of tickets
-        #num_tickets = 
-        #self.cursor.execute("SELECT ") # number of demerit notices
-        #num_notices = 
+        self.cursor.execute("SELECT regno FROM registrations WHERE fname =? AND lname=?", val01) # number of tickets
+        regno = self.cursor.fetchone()
+        self.cursor.execute("SELECT COUNT(tno) FROM tickets WHERE regno=?", (regno,)) # number of tickets
+        num_tickets = self.cursor.fetchone()
         
-        self.cursor.execute("SELECT points FROM demeritNotices WHERE demeritNotices.fname =? AND demeritNotices.lname =?", (first,last,)) # number of demerit points from all time
+        self.cursor.execute("SELECT COUNT(DISTINCT desc) FROM demeritNotices WHERE fname=? AND lname =?", val01) # number of demerit notices
+        num_notices = self.cursor.fetchone()        
+        
+        self.cursor.execute("SELECT points FROM demeritNotices WHERE demeritNotices.fname =? AND demeritNotices.lname =?", val01) # number of demerit points from all time
         points_all = self.cursor.fetchone()
-        #self.cursor.execute("SELECT points FROM demeritNotices WHERE fname =",first,"AND lname =", last, "AND ddate >") # number of demerit points from last 2 years
-        #points_two = self.cursor.fetchone()
         
+        val02 = (first, last, curr_date)
+        self.cursor.execute("SELECT points FROM demeritNotices WHERE demeritNotices.fname =? AND demeritNotices.lname =? AND ddate >?", val02) # number of demerit points from all time
+        points2y = self.cursor.fetchone()
         
-        
-        
+        self.results_06.addItem("Number of tickets, Number of Notices, Total Points, Points (Last 2y)")
+        list = str(num_tickets)," ", str(num_notices)," ", str(points_all), " ", str(points2y)
+        list = "".join(list)
+        self.results_06.addItem(list)       
         
         
 if __name__ == "__main__":
